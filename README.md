@@ -19,20 +19,16 @@ Inspired by [magisk-frida](https://github.com/ViRb3/magisk-frida).
 
 ## Usage
 
-After reboot, `renef_server` runs automatically on port **1907**.
+After reboot, `renef_server` starts automatically using **UDS** (Unix Domain Socket) on abstract socket `@com.android.internal.os.RuntimeInit`.
 
-Connect from your host machine:
+Connect from your host machine using the renef client:
 
 ```bash
-# Forward the port
-adb forward tcp:1907 tcp:1907
-
-# Use the renef client
 renef <command>
 ```
 
 The module description in your root manager will show:
-- ✅ `renef_server is running — port 1907` — healthy
+- ✅ `renef_server is running (UDS)` — healthy
 - ❌ `renef_server failed to start` — check logs
 
 ## Updating

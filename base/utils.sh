@@ -19,7 +19,7 @@ check_renef_is_up() {
 
     while [ "$count" -lt "$max" ]; do
         if busybox pgrep -x renef_server > /dev/null 2>&1; then
-            update_description "✅ renef_server is running — port 1907"
+            update_description "✅ renef_server is running (UDS)"
             return 0
         fi
         sleep 1
