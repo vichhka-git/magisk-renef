@@ -7,25 +7,17 @@ MODDIR="${0%/*}"
 # Wait until Android has fully booted
 wait_for_boot
 
-# Ensure libagent.so is accessible from the expected location
-# renef_server looks for libagent.so relative to its working dir
-RENEF_SERVER="$MODDIR/system/bin/renef_server"
-AGENT_SO="$MODDIR/system/lib64/libagent.so"
-
-# Bind-mount or symlink so renef_server can find libagent.so
-# Renef expects libagent.so alongside or in a known path
+# After bind-mount, renef_server is accessible at /system/bin/renef_server
+# Copy libagent.so to the location renef_server expects
 mkdir -p /data/local/tmp/.r
-cp -f "$AGENT_SO" /data/local/tmp/.r/libagent.so 2>/dev/null || true
-chmod 755 /data/local/tmp/.r/libagent.so 2>/dev/null || true
+cp -f /system/lib64/libagent.so /data/local/tmp/.r/libagent.so 2>/dev/null || \
+    cp -f "$MODDIR/system/lib64/libagent.so" /data/local/tmp/.r/libagent.so 2>/dev/null || true
+chmod 644 /data/local/tmp/.r/libagent.so 2>/dev/null || true
 
-# Start renef_server in UDS mode (default), backgrounded via nohup
-# renef_server has no daemon flag — run with nohup + &
-if [ -f "$RENEF_SERVER" ]; then
-    nohup "$RENEF_SERVER" > /data/local/tmp/renef_server.log 2>&1 &
-else
-    # Fall back to system path (Magisk bind-mount)
-    nohup renef_server > /data/local/tmp/renef_server.log 2>&1 &
-fi
+# Start renef_server in UDS mode (default)
+# Use setsid to detach from the service.sh process group
+# Redirect stdout/stderr to log file
+setsid /system/bin/renef_server > /data/local/tmp/renef_server.log 2>&1 &
 
 # Verify it came up
 check_renef_is_up 5
