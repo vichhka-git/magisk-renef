@@ -18,13 +18,13 @@ mkdir -p /data/local/tmp/.r
 cp -f "$AGENT_SO" /data/local/tmp/.r/libagent.so 2>/dev/null || true
 chmod 755 /data/local/tmp/.r/libagent.so 2>/dev/null || true
 
-# Start renef_server in background
-# Port 1907 (renef default); use -D flag for daemon mode if supported
+# Start renef_server in TCP mode, backgrounded via nohup
+# renef_server has no daemon flag — run with nohup + &
 if [ -f "$RENEF_SERVER" ]; then
-    "$RENEF_SERVER" -D &
+    nohup "$RENEF_SERVER" -t TCP -p 1907 > /data/local/tmp/renef_server.log 2>&1 &
 else
     # Fall back to system path (Magisk bind-mount)
-    renef_server -D &
+    nohup renef_server -t TCP -p 1907 > /data/local/tmp/renef_server.log 2>&1 &
 fi
 
 # Verify it came up
