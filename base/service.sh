@@ -7,6 +7,10 @@ MODDIR="${0%/*}"
 # Wait until Android has fully booted
 wait_for_boot
 
+# Set SELinux to Permissive so renef can find libc base in /proc/maps
+# Required on Android 12+ with APEX bionic and Samsung/custom ROMs
+setenforce 0 2>/dev/null || true
+
 RENEF_AGENT="/data/local/tmp/libagent.so"
 
 # Setup libagent.so at /data/local/tmp/libagent.so
