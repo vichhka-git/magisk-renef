@@ -32,7 +32,9 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Set up Python
-        run: uv python install 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
 
       - name: Run build
         env:
@@ -74,10 +76,10 @@ jobs:
             > ⚠️ ARM64 devices only.
 
             ### Usage
-            After reboot, `renef_server` starts automatically on port **1907**.
-            Connect with the renef client:
+            After reboot, `renef_server` starts automatically via UDS
+            (abstract socket `@com.android.internal.os.RuntimeInit`).
+            Connect with the renef client from your host machine:
             ```
-            adb forward tcp:1907 tcp:1907
             renef <command>
             ```
 
