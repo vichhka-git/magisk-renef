@@ -20,7 +20,8 @@ cp -f /system/bin/renef_server "$RENEF_BIN" 2>/dev/null || \
     cp -f "$MODDIR/system/bin/renef_server" "$RENEF_BIN" 2>/dev/null
 chmod +x "$RENEF_BIN"
 
-# Copy libagent.so as /data/local/tmp/.r (a file, not a directory)
+# If .r is a stale directory from old installs, remove it first
+[ -d "$RENEF_AGENT" ] && rm -rf "$RENEF_AGENT"
 cp -f /system/lib64/libagent.so "$RENEF_AGENT" 2>/dev/null || \
     cp -f "$MODDIR/system/lib64/libagent.so" "$RENEF_AGENT" 2>/dev/null
 chmod +x "$RENEF_AGENT"
