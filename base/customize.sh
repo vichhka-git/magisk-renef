@@ -1,6 +1,6 @@
 #!/system/bin/sh
 # shellcheck disable=SC2034
-SKIPUNZIP=1
+# SKIPUNZIP=1 not set: let the framework extract all files to $MODPATH
 SKIPMOUNT=false
 PROPFILE=false
 POSTFSDATA=false
@@ -16,9 +16,7 @@ print_modname() {
 on_install() {
     # renef only supports ARM64
     case "$ARCH" in
-        arm64)
-            F_ARCH="arm64"
-            ;;
+        arm64) ;;
         *)
             ui_print "! Unsupported architecture: $ARCH"
             ui_print "! renef_server only supports ARM64"
@@ -26,36 +24,25 @@ on_install() {
             ;;
     esac
 
-    ui_print "- Architecture : $F_ARCH"
+    ui_print "- Architecture : ARM64"
     ui_print "- Root solution: $(get_root_solution)"
     ui_print ""
 
-    # Extract module.prop first (required since SKIPUNZIP=1)
-    ui_print "- Extracting module.prop..."
-    unzip -o "$ZIPFILE" "module.prop" -d "$MODPATH" >&2
+    # Files are already extracted to $MODPATH by the framework.
+    # Just verify they landed correctly.
     if [ ! -f "$MODPATH/module.prop" ]; then
-        abort "! module.prop not found in module zip!"
+        abort "! module.prop missing from $MODPATH"
     fi
 
-    # Create target directories
-    mkdir -p "$MODPATH/system/bin"
-    mkdir -p "$MODPATH/system/lib64"
-
-    # Extract renef_server
-    ui_print "- Extracting renef_server..."
-    unzip -o "$ZIPFILE" "system/bin/renef_server" -d "$MODPATH" >&2
     if [ ! -f "$MODPATH/system/bin/renef_server" ]; then
-        abort "! renef_server not found in module zip!"
+        abort "! renef_server missing from $MODPATH/system/bin/"
     fi
 
-    # Extract libagent.so
-    ui_print "- Extracting libagent.so..."
-    unzip -o "$ZIPFILE" "system/lib64/libagent.so" -d "$MODPATH" >&2
     if [ ! -f "$MODPATH/system/lib64/libagent.so" ]; then
-        abort "! libagent.so not found in module zip!"
+        abort "! libagent.so missing from $MODPATH/system/lib64/"
     fi
 
-    ui_print "- Files installed successfully"
+    ui_print "- Files verified"
 
     # Update description with installed version
     local ver
