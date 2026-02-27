@@ -30,6 +30,13 @@ on_install() {
     ui_print "- Root solution: $(get_root_solution)"
     ui_print ""
 
+    # Extract module.prop first (required since SKIPUNZIP=1)
+    ui_print "- Extracting module.prop..."
+    unzip -o "$ZIPFILE" "module.prop" -d "$MODPATH" >&2
+    if [ ! -f "$MODPATH/module.prop" ]; then
+        abort "! module.prop not found in module zip!"
+    fi
+
     # Create target directories
     mkdir -p "$MODPATH/system/bin"
     mkdir -p "$MODPATH/system/lib64"
@@ -49,10 +56,16 @@ on_install() {
     fi
 
     ui_print "- Files installed successfully"
+
+    # Update description with installed version
+    local ver
+    ver=$(grep '^version=' "$MODPATH/module.prop" | cut -d= -f2)
+    sed -i "s/^description=.*/description=Renef ${ver} installed. Waiting for boot.../" \
+        "$MODPATH/module.prop" 2>/dev/null || true
 }
 
 get_root_solution() {
-    if [ "$KSU" = "true" ]; then
+    if [ "$KSU" = "true" ] || [ "$KSU_NEXT" = "true" ]; then
         echo "KernelSU"
     elif [ "$APATCH" = "true" ]; then
         echo "APatch"
@@ -71,7 +84,3 @@ set_permissions() {
 if [ -f "$MODPATH/disable" ]; then
     ui_print "- Module disabled, skipping service setup"
 fi
-
-# Update description with install status
-sed -i "s/^description=.*/description=Renef v$(grep '^version=' "$MODPATH/module.prop" | cut -d= -f2) installed. Waiting for boot.../" \
-    "$MODPATH/module.prop" 2>/dev/null || true
