@@ -1,0 +1,100 @@
+name: Build and Release MagiskRenef
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: "Force a new release even if renef version hasn't changed"
+        required: false
+        default: false
+        type: boolean
+  repository_dispatch:
+  schedule:
+    # Run daily at 13:08 UTC
+    - cron: "8 13 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Run build
+        env:
+          FORCE_RELEASE: ${{ github.event.inputs.force_release || 'false' }}
+        run: uv run python3 main.py
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: magisk-renef-build
+          path: build/
+          if-no-files-found: warn
+
+      - name: Read new tag
+        id: tag
+        run: |
+          if [ -f NEW_TAG.txt ]; then
+            echo "new_tag=$(cat NEW_TAG.txt)" >> "$GITHUB_OUTPUT"
+            echo "has_new_tag=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_new_tag=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create GitHub Release
+        if: steps.tag.outputs.has_new_tag == 'true'
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "build/*.zip,build/updater.json"
+          tag: ${{ steps.tag.outputs.new_tag }}
+          name: "MagiskRenef ${{ steps.tag.outputs.new_tag }}"
+          body: |
+            ## MagiskRenef ${{ steps.tag.outputs.new_tag }}
+
+            Automated release tracking [renef](https://github.com/Ahmeth4n/renef/releases).
+
+            ### Installation
+            Flash the ZIP via **Magisk**, **KernelSU**, or **APatch**.
+
+            > ⚠️ ARM64 devices only.
+
+            ### Usage
+            After reboot, `renef_server` starts automatically on port **1907**.
+            Connect with the renef client:
+            ```
+            adb forward tcp:1907 tcp:1907
+            renef <command>
+            ```
+
+            ### Changelog
+            See [renef releases](https://github.com/Ahmeth4n/renef/releases) for upstream changes.
+          token: ${{ secrets.GITHUB_TOKEN }}
+          allowUpdates: false
+          omitDraftDuringUpdate: true
+
+      - name: Configure git for tag push
+        if: steps.tag.outputs.has_new_tag == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Tag the release commit
+        if: steps.tag.outputs.has_new_tag == 'true'
+        run: |
+          git tag "${{ steps.tag.outputs.new_tag }}"
+          git push origin "${{ steps.tag.outputs.new_tag }}"

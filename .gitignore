@@ -1,0 +1,7 @@
+build/
+downloads/
+__pycache__/
+*.pyc
+.uv/
+.venv/
+NEW_TAG.txt

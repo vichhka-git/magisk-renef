@@ -1,0 +1,13 @@
+#!/sbin/sh
+# update-binary — Magisk/KernelSU/APatch module installer shim
+#
+# This script is the entry point called by the root manager's installer.
+# It sources the Magisk module utilities and delegates to customize.sh.
+
+SKIPUNZIP=1
+
+# Extract and execute the Magisk module utility script
+unzip -o "$ZIPFILE" 'META-INF/com/google/android/update-binary' -d "$TMPDIR" >&2
+
+# Source module installer framework
+. "$TMPDIR/META-INF/com/google/android/update-binary" "$MAGISK_VER_CODE" "$OUTFD" "$ZIPFILE"

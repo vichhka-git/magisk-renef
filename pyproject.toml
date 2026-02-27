@@ -1,0 +1,15 @@
+[project]
+name = "magisk-renef"
+version = "0.1.0"
+description = "Build system for MagiskRenef — auto-packaging renef_server as a Magisk module"
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+dev-dependencies = []
