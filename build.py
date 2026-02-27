@@ -2,8 +2,10 @@ import json
 import os
 import shutil
 import tarfile
-import urllib.request
+import time
 from pathlib import Path
+
+import requests
 
 BASE_DIR = Path(__file__).parent
 BUILD_DIR = BASE_DIR / "build"
@@ -23,7 +25,22 @@ def download_file(url: str, path: Path) -> None:
         return
     print(f"  [download] {url}")
     path.parent.mkdir(parents=True, exist_ok=True)
-    urllib.request.urlretrieve(url, path)
+    # Retry up to 5 times with exponential backoff
+    for attempt in range(1, 6):
+        try:
+            with requests.get(url, stream=True, timeout=60) as r:
+                r.raise_for_status()
+                tmp_path = path.with_suffix(path.suffix + ".tmp")
+                with open(tmp_path, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                tmp_path.rename(path)
+                return
+        except Exception as e:
+            print(f"  [retry {attempt}/5] {e}")
+            if attempt < 5:
+                time.sleep(2 ** attempt)
+    raise RuntimeError(f"Failed to download {url} after 5 attempts")
 
 
 def extract_renef_archive(archive_path: Path, dest_dir: Path) -> None:
