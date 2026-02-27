@@ -21,6 +21,7 @@ chcon u:object_r:app_data_file:s0 "$RENEF_AGENT" 2>/dev/null || true
 # Start renef_server as root from /system/bin (system_file SELinux context)
 # renef_server needs root (uid 0) to read /proc/PID/maps of app processes
 setsid /system/bin/renef_server > /data/local/tmp/renef_server.log 2>&1 &
+echo $! > /data/local/tmp/renef_server.pid
 
 # Verify it came up
 check_renef_is_up 5

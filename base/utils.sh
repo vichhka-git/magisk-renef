@@ -1,6 +1,5 @@
 #!/system/bin/sh
 # utils.sh - Shared utilities for MagiskRenef scripts
-MODDIR="${0%/*}"
 
 # Wait for Android to finish booting
 wait_for_boot() {
@@ -18,7 +17,7 @@ check_renef_is_up() {
     local max=$((timeout * 2))
 
     while [ "$count" -lt "$max" ]; do
-        if busybox pgrep -x renef_server > /dev/null 2>&1; then
+        if pgrep renef_server > /dev/null 2>&1 || busybox pgrep renef_server > /dev/null 2>&1 || kill -0 "$(cat /data/local/tmp/renef_server.pid 2>/dev/null)" 2>/dev/null; then
             update_description "✅ renef_server is running (UDS)"
             return 0
         fi
