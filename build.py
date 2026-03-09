@@ -68,7 +68,7 @@ def generate_version_code(project_tag: str) -> int:
 
 def create_module_prop(path: Path, project_tag: str) -> None:
     version_code = generate_version_code(project_tag)
-    update_json_url = "https://raw.githubusercontent.com/vichhka-git/magisk-renef/master/build/updater.json"
+    update_json_url = "https://github.com/vichhka-git/magisk-renef/releases/latest/download/updater.json"
     content = f"""\
 id=magisk-renef
 name=MagiskRenef
@@ -135,7 +135,7 @@ def create_updater_json(project_tag: str) -> None:
         f"https://github.com/vichhka-git/magisk-renef/releases/download"
         f"/{project_tag}/MagiskRenef-{project_tag}.zip"
     )
-    changelog_url = "https://github.com/Ahmeth4n/renef/releases"
+    changelog_url = "https://raw.githubusercontent.com/vichhka-git/magisk-renef/refs/heads/main/CHANGELOG.md"
     data = {
         "version": f"v{project_tag}",
         "versionCode": version_code,
