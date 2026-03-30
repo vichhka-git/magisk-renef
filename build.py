@@ -75,7 +75,7 @@ name=MagiskRenef
 version=v{project_tag}
 versionCode={version_code}
 author=vichhka
-description=Renef server for Android (ARM64) — dynamic instrumentation via Magisk
+description=Run renef_server on boot: ⏺️ (not started)
 updateJson={update_json_url}
 """
     path.write_text(content)
