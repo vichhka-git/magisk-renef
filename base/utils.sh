@@ -12,20 +12,23 @@ wait_for_boot() {
 
 # Check if renef_server is running and update module.prop description
 check_renef_is_up() {
-    local timeout="${1:-5}"
-    local count=0
-    local max=$((timeout * 2))
-
-    while [ "$count" -lt "$max" ]; do
-        if pgrep renef_server > /dev/null 2>&1 || busybox pgrep renef_server > /dev/null 2>&1 || kill -0 "$(cat /data/local/tmp/renef_server.pid 2>/dev/null)" 2>/dev/null; then
-            update_description "✅ renef_server is running (UDS)"
+    local retries=$1
+    local i=0
+    while [ $i -lt $retries ]; do
+        if busybox pgrep 'renef_server' > /dev/null 2>&1; then
+            local pid
+            pid="$(busybox pgrep 'renef_server')"
+            echo "[+] renef_server is running (PID: $pid)"
+            string="description=Run renef_server on boot: ✅ (running, UDS)"
+            sed -i "s/^description=.*/$string/g" $MODPATH/module.prop
             return 0
         fi
         sleep 1
-        count=$((count + 1))
+        i=$((i + 1))
     done
-
-    update_description "❌ renef_server failed to start"
+    echo "[-] renef_server failed to start"
+    string="description=Run renef_server on boot: ❌ (failed)"
+    sed -i "s/^description=.*/$string/g" $MODPATH/module.prop
     return 1
 }
 
