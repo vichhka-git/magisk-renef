@@ -20,7 +20,7 @@ check_renef_is_up() {
             pid="$(busybox pgrep 'renef_server')"
             echo "[+] renef_server is running (PID: $pid)"
             string="description=Run renef_server on boot: ✅ (running, UDS)"
-            sed -i "s/^description=.*/$string/g" $MODPATH/module.prop
+            sed -i "s/^description=.*/$string/g" ${MODPATH:-$MODDIR}/module.prop
             return 0
         fi
         sleep 1
@@ -28,7 +28,7 @@ check_renef_is_up() {
     done
     echo "[-] renef_server failed to start"
     string="description=Run renef_server on boot: ❌ (failed)"
-    sed -i "s/^description=.*/$string/g" $MODPATH/module.prop
+    sed -i "s/^description=.*/$string/g" ${MODPATH:-$MODDIR}/module.prop
     return 1
 }
 

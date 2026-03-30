@@ -2,6 +2,7 @@
 MODPATH=${0%/*}
 PATH=$PATH:/data/adb/ap/bin:/data/adb/magisk:/data/adb/ksu/bin
 
+mkdir -p $MODPATH/logs
 exec 2>> $MODPATH/logs/action.log
 set -x
 
